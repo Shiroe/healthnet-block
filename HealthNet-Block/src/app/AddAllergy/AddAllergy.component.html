@@ -192,7 +192,15 @@
           </ul>
         </div>
       </div>
-      <button type="button" class="btn btn-primary invokeTransactionBtn" data-toggle="modal">Invoke</button>
+      <button
+        type="button"
+        class="btn btn-primary invokeTransactionBtn"
+        data-toggle="modal"
+        (click)="resetForm();"
+        data-target="#addTransactionModal"
+      >
+        Invoke
+      </button>
     </div>
   </div>
 </div>
