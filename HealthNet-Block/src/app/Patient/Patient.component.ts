@@ -15,19 +15,21 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { FormGroup, FormControl, Validators, FormBuilder } from '@angular/forms';
 import { PatientService } from './Patient.service';
+import { DoctorService } from '../Doctor/Doctor.service';
 import 'rxjs/add/operator/toPromise';
 
 @Component({
   selector: 'app-patient',
   templateUrl: './Patient.component.html',
   styleUrls: ['./Patient.component.css'],
-  providers: [PatientService]
+  providers: [PatientService, DoctorService]
 })
 export class PatientComponent implements OnInit {
 
   myForm: FormGroup;
 
   private allParticipants;
+  private allDoctors;
   private participant;
   private currentId;
   private errorMessage;
@@ -45,7 +47,7 @@ export class PatientComponent implements OnInit {
   allowedDoctor = new FormControl('', Validators.required);
 
 
-  constructor(public servicePatient: PatientService, fb: FormBuilder) {
+  constructor(public servicePatient: PatientService, public serviceDoctor: DoctorService, fb: FormBuilder) {
     this.myForm = fb.group({
       id: this.id,
       birthDate: this.birthDate,
@@ -65,16 +67,36 @@ export class PatientComponent implements OnInit {
     this.loadAll();
   }
 
-  loadAll(): Promise<any> {
-    const tempList = [];
-    return this.servicePatient.getAll()
+  async loadAll(): Promise<any> {
+    const tempParticipantsList = [];
+    const tempDoctorsList = [];
+
+    await this.servicePatient.getAll()
     .toPromise()
     .then((result) => {
       this.errorMessage = null;
       result.forEach(participant => {
-        tempList.push(participant);
+        tempParticipantsList.push(participant);
       });
-      this.allParticipants = tempList;
+      this.allParticipants = tempParticipantsList;
+    })
+    .catch((error) => {
+      if (error === 'Server error') {
+        this.errorMessage = 'Could not connect to REST server. Please check your configuration details';
+      } else if (error === '404 - Not Found') {
+        this.errorMessage = '404 - Could not find API route. Please check your available APIs.';
+        this.errorMessage = error;
+      }
+    });
+
+    return this.serviceDoctor.getAll()
+    .toPromise()
+    .then((result) => {
+      this.errorMessage = null;
+      result.forEach(doctor => {
+        tempDoctorsList.push(doctor);
+      });
+      this.allDoctors = tempDoctorsList;
     })
     .catch((error) => {
       if (error === 'Server error') {
@@ -124,7 +146,7 @@ export class PatientComponent implements OnInit {
       'gender': this.gender.value,
       'address': this.address.value,
       'publicKey': this.publicKey.value,
-      'allowedDoctor': this.allowedDoctor.value
+      'allowedDoctor': this.allDoctors.filter(doc => doc.id === this.allowedDoctor.value)[0]
     };
 
     this.myForm.setValue({
@@ -182,7 +204,7 @@ export class PatientComponent implements OnInit {
       'gender': this.gender.value,
       'address': this.address.value,
       'publicKey': this.publicKey.value,
-      'allowedDoctor': this.allowedDoctor.value
+      'allowedDoctor': this.allDoctors.filter(doc => doc.id === this.allowedDoctor.value)[0]
     };
 
     return this.servicePatient.updateParticipant(form.get('id').value, this.participant)
@@ -307,7 +329,7 @@ export class PatientComponent implements OnInit {
       }
 
       if (result.allowedDoctor) {
-        formObject.allowedDoctor = result.allowedDoctor;
+        formObject.allowedDoctor = this.allDoctors.filter(doc => doc.id === result.allowedDoctor.id)[0];
       } else {
         formObject.allowedDoctor = null;
       }
