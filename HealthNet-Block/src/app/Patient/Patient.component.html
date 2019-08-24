@@ -129,7 +129,9 @@
                 <div class="form-group text-left">
                   <label for="allowedDoctor">allowedDoctor</label>
                   
-                      <textarea formControlName="allowedDoctor" class="form-control" rows="3"></textarea>
+                      <select [ngModel]="allowedDoctor" formControlName="allowedDoctor" class="form-control">
+                        <option *ngFor="let doctor of allDoctors" [ngValue]="doctor" [selected]="doctor === selectedDoctor">{{doctor.name}}</option>
+                      </select>
                   
                 </div>
               
@@ -253,12 +255,11 @@
             
               <div class="form-group text-left">
                 <label for="allowedDoctor">allowedDoctor</label>
-  
-                
+
                   
-                    <textarea [ngModel]="allowedDoctor" formControlName="allowedDoctor" class="form-control" rows="3"></textarea>
-                  
-                
+                    <select [ngModel]="allowedDoctor" formControlName="allowedDoctor" class="form-control">
+                      <option *ngFor="let doctor of allDoctors" [ngValue]="doctor" [selected]="doctor === selectedDoctor">{{doctor.name}}</option>
+                    </select>
   
               </div>
             
@@ -382,7 +383,7 @@
               
                   <td class="participant-properties">{{participant.publicKey}}</td>
               
-                  <td class="participant-properties">{{participant.allowedDoctor}}</td>
+                  <td class="participant-properties">{{participant.allowedDoctor ? participant.allowedDoctor.name : ''}}</td>
               
               <td>
                 <button (click)="getForm(participant.id);" type="button" class="btn btn-update" data-toggle="modal" data-target="#updateParticipantModal">
