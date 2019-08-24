@@ -1,0 +1,245 @@
+/*
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Access control rules for tutorial-network
+ */
+rule DoctorsSeeOwnHistoryOnly {
+    description: "Doctors should be able to see the history of their own transactions only"
+    participant(m): "mc.thesis.demo.Doctor"
+    operation: READ
+    resource(v): "org.hyperledger.composer.system.HistorianRecord"
+    condition: (v.participantInvoking.getIdentifier() != m.getIdentifier())
+    action: DENY
+}
+
+rule DoctorCannotSeeSystemTransactions {
+    description: "Doctor should not be able to see some of the system transactions"
+    participant(m): "mc.thesis.demo.Doctor"
+    operation: READ
+    resource(v): "org.hyperledger.composer.system.HistorianRecord"
+    condition: ((v.transactionType == "org.hyperledger.composer.system.SetLogLevel") || 
+                (v.transactionType == "org.hyperledger.composer.system.AddParticipant") || 
+                (v.transactionType == "org.hyperledger.composer.system.IssueIdentity") || 
+                (v.transactionType == "org.hyperledger.composer.system.BindIdentity") || 
+                (v.transactionType == "org.hyperledger.composer.system.ActivateCurrentIdentity") || 
+                (v.transactionType == "org.hyperledger.composer.system.RevokeIdentity") || 
+                (v.transactionType == "org.hyperledger.composer.system.StartBusinessNetwork") || 
+                (v.transactionType == "org.hyperledger.composer.system.ResetBusinessNetwork"))
+    action: DENY
+}
+
+rule PatientCanCreateTransactions {
+    description: "Patient can create transactions"
+    participant: "mc.thesis.demo.Patient"
+    operation: CREATE
+    resource: "org.hyperledger.composer.system.HistorianRecord"
+    action: ALLOW
+}
+
+rule DoctorsCanOnlyViewSharedPatientKeys {
+    description: "Only allow doctors to view patient keys that are shared with them"
+    participant(dp): "mc.thesis.demo.Doctor"
+    operation: READ
+    resource(pk): "mc.thesis.demo.PatientKey"
+    condition: (pk.healthProvider.getIdentifier() == dp.getIdentifier())
+    action: ALLOW
+}
+
+rule DoctorsCanUpdateThemselves {
+    description: "Only allow doctors to update themselves"
+    participant(t): "mc.thesis.demo.Doctor"
+    operation: UPDATE
+    resource(v): "mc.thesis.demo.Doctor"
+    condition: (v.getIdentifier() == t.getIdentifier())
+    action: ALLOW
+}
+
+rule DoctorsReadAccess {
+    description: "Doctors should be able to read other doctors"
+    participant: "mc.thesis.demo.Doctor"
+    operation: READ
+    resource: "mc.thesis.demo.Doctor"
+    action: ALLOW
+}
+
+rule DoctorsCanAccessPatientsThatSharedKey {
+    description: "Grant doctor read access to patients that shared their patient key (gave consent)"
+    participant(d): "mc.thesis.demo.Doctor"
+    operation: READ
+    resource(p): "mc.thesis.demo.Patient"
+    condition: (checkAccessToPatient(p,d))
+    action: ALLOW
+}
+
+rule DoctorsCanOnlyAccessSharedPatientsRecords {
+    description: "Doctors can only access health records from patients that shared their patient key (gave consent)"
+    participant(d): "mc.thesis.demo.Doctor"
+    operation: READ,UPDATE,DELETE
+    resource(r) : "mc.thesis.demo.Record"
+    condition: (checkAccessToPatient(r.patient,d))
+    action: ALLOW
+}
+
+rule DoctorsCanOnlyCreateRecordsForSharedPatients {
+    description: "Doctors can only create records for consented patients using their own ID"
+    participant(d): "mc.thesis.demo.Doctor"
+    operation: CREATE
+    resource(r) : "mc.thesis.demo.Record"
+    condition: ((checkAccessToPatient(r.patient,d) && (r.healthProvider.getIdentifier() == d.getIdentifier())))
+    action: ALLOW
+}
+
+rule DoctorsCanCreateRecordSharingRequests {
+    description: "Doctors can create record sharing request transactions"
+    participant(d): "mc.thesis.demo.Doctor"
+    operation: ALL
+    resource(rrs) : "mc.thesis.demo.RequestRecordSharing"
+    condition: (rrs.healthProvider.getIdentifier() == d.getIdentifier())
+    action: ALLOW
+}
+
+rule PatientsCanOnlyViewRecordSharingRequestedToThemselves {
+    description: "A patient should only be able to see record sharing requests for him"
+    participant(p) : "mc.thesis.demo.Patient"
+    operation: READ
+    resource(rrs) : "mc.thesis.demo.RequestRecordSharing"
+  	condition: (rrs.patient.getIdentifier() == p.getIdentifier())
+    action: ALLOW
+}
+
+rule PatientsCanRevokeTheirSharedKeys {
+    description: "A patient should be able to revoke the patient key shared with another Doctor (revoke consent)"
+    participant(p) : "mc.thesis.demo.Patient"
+    operation: ALL
+    resource(rmrs) : "mc.thesis.demo.RevokeMedicalRecordsSharing"
+  	condition: (rmrs.patient.getIdentifier() == p.getIdentifier())
+    action: ALLOW
+}
+
+rule PatientsCanAccessOnlyTheirSharedKey {
+    description: "Patients should only be able to access their own shared patient keys"
+    participant(p): "mc.thesis.demo.Patient"
+    operation: ALL
+    resource(pk): "mc.thesis.demo.PatientKey"
+    condition: (pk.patient.getIdentifier() == p.getIdentifier())
+    action: ALLOW
+}
+
+rule PatientsEnableShareTheirKey {
+    description: "Patients should be able to share their patient key with doctors (give consent)"
+    participant(p) : "mc.thesis.demo.Patient"
+    operation: ALL
+    resource(sk) : "mc.thesis.demo.ShareKey"
+  	condition: (sk.patient.getIdentifier() == p.getIdentifier())
+    action: ALLOW
+}
+
+rule PatientsCanOnlyViewTheirOwnRecords {
+    description: "Patients should only be able to read their own health records"
+    participant(p): "mc.thesis.demo.Patient"
+    operation: READ
+    resource(r): "mc.thesis.demo.Record"
+    condition: (r.patient.getIdentifier() == p.getIdentifier())
+    action: ALLOW
+}
+
+rule PatientsCanOnlyViewDoctors {
+    description: "Patients should only have read access to doctors"
+    participant: "mc.thesis.demo.Patient"
+    operation: READ
+    resource: "mc.thesis.demo.Doctor"
+    action: ALLOW
+}
+
+rule PatientsCanOnlyAccessThemselves {
+    description: "Patients can only read and update their own participant data"
+    participant(p1): "mc.thesis.demo.Patient"
+    operation: READ, UPDATE
+    resource(p2): "mc.thesis.demo.Patient"
+    condition: (p2.getIdentifier() == p1.getIdentifier())
+    action: ALLOW
+}
+
+rule PatientReadTransactionAccess {
+    description: "Patients should have only read access to the transaction registry"
+    participant: "mc.thesis.demo.Patient"
+    operation: READ
+    resource: "org.hyperledger.composer.system.TransactionRegistry"
+    action: ALLOW
+}
+
+rule PatientReadAssetAccess {
+    description: "Patients should have only read access to the asset registry"
+    participant: "mc.thesis.demo.Patient"
+    operation: READ
+    resource: "org.hyperledger.composer.system.AssetRegistry"
+    action: ALLOW
+}
+
+rule PatientReadParticipantAccess {
+    description: "Patients should have only read access to the participant registry"
+    participant: "mc.thesis.demo.Patient"
+    operation: READ
+    resource: "org.hyperledger.composer.system.ParticipantRegistry"
+    action: ALLOW
+}
+
+rule PatientCanUpdateParticipants {
+    description: "Patients should be able to update participants"
+    participant: "mc.thesis.demo.Patient"
+    operation: CREATE
+    resource: "org.hyperledger.composer.system.UpdateParticipant"
+    action: ALLOW
+}
+
+rule DoctorNoIdentityAccess {
+    description: "Doctors should not have access to the identities of the participants"
+    participant: "mc.thesis.demo.Doctor"
+    operation: ALL
+    resource: "org.hyperledger.composer.system.Identity"
+    action: DENY
+}
+
+rule DoctorFullAccess {
+    description: "Health providers should have access to other system resources"
+    participant: "mc.thesis.demo.Doctor"
+    operation: ALL
+    resource: "org.hyperledger.composer.system.**"
+    action: ALLOW
+}
+
+rule NetworkUserAdminUser {
+    description: "Allow network business admins full access to user resources"
+    participant: "org.hyperledger.composer.system.NetworkAdmin"
+    operation: ALL
+    resource: "**"
+    action: ALLOW
+}
+
+rule StandardUserNetworkAccess {
+    description: "Allow standard users to be able to connect to the business network"
+    participant: "org.hyperledger.composer.system.Participant"
+    operation: READ
+    resource: "org.hyperledger.composer.system.Network"
+    action: ALLOW
+}
+
+rule NetworkAdminSystem {
+    description: "Grant business network admins full access to system resources"
+    participant: "org.hyperledger.composer.system.NetworkAdmin"
+    operation: ALL
+    resource: "org.hyperledger.composer.system.**"
+    action: ALLOW
+}
