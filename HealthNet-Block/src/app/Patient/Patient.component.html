@@ -285,46 +285,78 @@
         </div>
 
         <div class="modal-body">
-          <div>
+          <div *ngIf="patientRecord.allergies.length">
             <h3>Allergies</h3>
-            <div>
-              <span *ngFor="let al of patientRecord.allergies">{{al | json}}</span>
-            </div>
+            <li *ngFor="let al of patientRecord.allergies">
+              <h4>{{al.allergy_code}}</h4>
+              <div>
+                Start date: {{al.allergy_start}}
+                Recorded on: {{al.record_date}}
+                From Doctor: {{al.doctor}}
+              </div>
+            </li>
           </div>
 
-          <div>
+          <div *ngIf="patientRecord.conditions.length">
             <h3>Conditions</h3>
-            <div>
-              <span *ngFor="let con of patientRecord.conditions">{{con | json}}</span>
-            </div>
+
+            <li *ngFor="let con of patientRecord.conditions">
+              <h4>{{con.cond_code}}</h4>
+              <div>
+                Start date: {{con.cond_start}}
+                Recorded on: {{con.record_date}}
+                From Doctor: {{con.doctor}}
+              </div>
+            </li>
           </div>
 
-          <div>
+          <div *ngIf="patientRecord.immunizations.length">
             <h3>Immunizations</h3>
-            <div>
-              <span *ngFor="let im of patientRecord.immunizations">{{im | json}}</span>
-            </div>
+            <li *ngFor="let im of patientRecord.immunizations">
+              <h4>{{im.imm_code}}</h4>
+              <div>
+                Start date: {{im.imm_start}}
+                Recorded on: {{im.record_date}}
+                From Doctor: {{im.doctor}}
+              </div>
+            </li>
           </div>
 
-          <div>
+          <div *ngIf="patientRecord.medications.length">
             <h3>Medication</h3>
-            <div>
-              <span *ngFor="let med of patientRecord.medications">{{med | json}}</span>
-            </div>
+            <li *ngFor="let med of patientRecord.medications">
+              <h4>{{med.medication_code}}</h4>
+              <div>
+                Start date: {{med.medication_start}}
+                Stop date: {{med.medication_stop}}
+                Recorded on: {{med.record_date}}
+                From Doctor: {{med.doctor}}
+              </div>
+            </li>
           </div>
 
-          <div>
+          <div *ngIf="patientRecord.observations.length">
             <h3>Observations</h3>
-            <div>
-              <span *ngFor="let obs of patientRecord.observations">{{obs | json}}</span>
-            </div>
+            <li *ngFor="let obs of patientRecord.observations">
+              <h4>{{obs.obs_code}}</h4>
+              <div>
+                Start date: {{obs.obs_date}}
+                Recorded on: {{obs.record_date}}
+                From Doctor: {{obs.doctor}}
+              </div>
+            </li>
           </div>
 
-          <div>
+          <div *ngIf="patientRecord.procedures.length">
             <h3>Procedures</h3>
-            <div>
-              <span *ngFor="let pro of patientRecord.procedures">{{pro | json}}</span>
-            </div>
+            <li *ngFor="let pro of patientRecord.procedures">
+              <h4>{{pro.procedure_code}}</h4>
+              <div>
+                Start date: {{pro.procedure_date}}
+                Recorded on: {{pro.record_date}}
+                From Doctor: {{pro.doctor}}
+              </div>
+            </li>
           </div>
         </div>
 
