@@ -27,8 +27,8 @@ import {Event} from './org.hyperledger.composer.system';
       record_code: string;
       record_reasonCode: string;
       record_reasonDesc: string;
-      doctor: Doctor;
-      patient: Patient;
+      doctor: string;
+      patient: string;
    }
    export class Allergy extends Record {
       allergy_start: string;
