@@ -28,8 +28,10 @@
             
               <div class="form-group text-left">
                 <label for="patient">patient</label>
-                
-                    <textarea formControlName="patient" class="form-control" rows="3"></textarea>
+
+                    <select [ngModel]="patient" formControlName="patient" class="form-control">
+                      <option *ngFor="let p of allPatients" [ngValue]="p" [selected]="p === patient">{{p.last}} {{p.first}}</option>
+                    </select>
                 
               </div>
             
@@ -39,10 +41,11 @@
               <div class="form-group text-left">
                 <label for="doctor">doctor</label>
                 
-                    <textarea formControlName="doctor" class="form-control" rows="3"></textarea>
+                    <select [ngModel]="doctor" formControlName="doctor" class="form-control">
+                      <option *ngFor="let doc of allDoctors" [ngValue]="doc" [selected]="doc === doctor">{{doc.name}}</option>
+                    </select>
                 
               </div>
-            
           
 
             

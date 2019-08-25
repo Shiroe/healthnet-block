@@ -15,19 +15,25 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { FormGroup, FormControl, Validators, FormBuilder } from '@angular/forms';
 import { ShareKeyService } from './ShareKey.service';
+import { PatientService } from '../Patient/Patient.service';
+import { DoctorService } from '../Doctor/Doctor.service';
 import 'rxjs/add/operator/toPromise';
+
+const NAMESPACE_RESOURCE = 'resource:mc.thesis.demo';
 
 @Component({
   selector: 'app-sharekey',
   templateUrl: './ShareKey.component.html',
   styleUrls: ['./ShareKey.component.css'],
-  providers: [ShareKeyService]
+  providers: [ShareKeyService, PatientService, DoctorService]
 })
 export class ShareKeyComponent implements OnInit {
 
   myForm: FormGroup;
 
   private allTransactions;
+  private allPatients;
+  private allDoctors;
   private Transaction;
   private currentId;
   private errorMessage;
@@ -39,8 +45,14 @@ export class ShareKeyComponent implements OnInit {
   timestamp = new FormControl('', Validators.required);
 
 
-  constructor(private serviceShareKey: ShareKeyService, fb: FormBuilder) {
-    this.myForm = fb.group({
+  constructor(
+    private serviceShareKey: ShareKeyService,
+    public servicePatient: PatientService,
+    public serviceDoctor: DoctorService,
+    fb: FormBuilder
+    ) {
+    
+      this.myForm = fb.group({
       patient: this.patient,
       doctor: this.doctor,
       encryptedPatientKeyDoctorPublic: this.encryptedPatientKeyDoctorPublic,
@@ -53,9 +65,12 @@ export class ShareKeyComponent implements OnInit {
     this.loadAll();
   }
 
-  loadAll(): Promise<any> {
+  async loadAll(): Promise<any> {
     const tempList = [];
-    return this.serviceShareKey.getAll()
+    const tempPatList = [];
+    const tempDocList = [];
+
+    await this.serviceShareKey.getAll()
     .toPromise()
     .then((result) => {
       this.errorMessage = null;
@@ -63,6 +78,44 @@ export class ShareKeyComponent implements OnInit {
         tempList.push(transaction);
       });
       this.allTransactions = tempList;
+    })
+    .catch((error) => {
+      if (error === 'Server error') {
+        this.errorMessage = 'Could not connect to REST server. Please check your configuration details';
+      } else if (error === '404 - Not Found') {
+        this.errorMessage = '404 - Could not find API route. Please check your available APIs.';
+      } else {
+        this.errorMessage = error;
+      }
+    });
+
+    await this.servicePatient.getAll()
+    .toPromise()
+    .then((result) => {
+      this.errorMessage = null;
+      result.forEach(patient => {
+        tempPatList.push(patient);
+      });
+      this.allPatients = tempPatList;
+    })
+    .catch((error) => {
+      if (error === 'Server error') {
+        this.errorMessage = 'Could not connect to REST server. Please check your configuration details';
+      } else if (error === '404 - Not Found') {
+        this.errorMessage = '404 - Could not find API route. Please check your available APIs.';
+      } else {
+        this.errorMessage = error;
+      }
+    });
+
+    return this.serviceDoctor.getAll()
+    .toPromise()
+    .then((result) => {
+      this.errorMessage = null;
+      result.forEach(doctor => {
+        tempDocList.push(doctor);
+      });
+      this.allDoctors = tempDocList;
     })
     .catch((error) => {
       if (error === 'Server error') {
@@ -103,8 +156,8 @@ export class ShareKeyComponent implements OnInit {
   addTransaction(form: any): Promise<any> {
     this.Transaction = {
       $class: 'mc.thesis.demo.ShareKey',
-      'patient': this.patient.value,
-      'doctor': this.doctor.value,
+      'patient': `${NAMESPACE_RESOURCE}.Patient#${this.patient.value.id}`,
+      'doctor': `${NAMESPACE_RESOURCE}.Doctor#${this.doctor.value.id}`,
       'encryptedPatientKeyDoctorPublic': this.encryptedPatientKeyDoctorPublic.value,
       'transactionId': this.transactionId.value,
       'timestamp': this.timestamp.value
@@ -142,8 +195,8 @@ export class ShareKeyComponent implements OnInit {
   updateTransaction(form: any): Promise<any> {
     this.Transaction = {
       $class: 'mc.thesis.demo.ShareKey',
-      'patient': this.patient.value,
-      'doctor': this.doctor.value,
+      'patient': `${NAMESPACE_RESOURCE}.Patient#${this.patient.value.id}`,
+      'doctor': `${NAMESPACE_RESOURCE}.Doctor#${this.doctor.value.id}`,
       'encryptedPatientKeyDoctorPublic': this.encryptedPatientKeyDoctorPublic.value,
       'timestamp': this.timestamp.value
     };
