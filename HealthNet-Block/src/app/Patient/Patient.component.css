@@ -160,6 +160,28 @@ label {
     color: #fff;
     fill: currentColor;
 }
+.svg-icon {
+  min-width: 1em;
+  height: 0.6em;
+  font-size: 20px;
+}
+
+.btn > .btn-record-data {
+    padding-top: 4px;
+    padding-bottom: 3px;
+}
+/*
+.svg-icon path,
+.svg-icon polygon,
+.svg-icon rect {
+  color: #333;
+  fill: currentColor;
+}
+
+.svg-icon circle {
+  stroke: #333;
+  stroke-width: 1;
+} */
 
 /***.participant-properties:hover, .participant-properties:hover span{  
 overflow: visible;

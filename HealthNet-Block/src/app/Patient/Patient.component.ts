@@ -18,11 +18,28 @@ import { PatientService } from './Patient.service';
 import { DoctorService } from '../Doctor/Doctor.service';
 import 'rxjs/add/operator/toPromise';
 
+// Asset construction services
+import { AllergyService } from '../Allergy/Allergy.service';
+import { ConditionService } from '../Condition/Condition.service';
+import { ImmunizationService } from '../Immunization/Immunization.service';
+import { MedicationService } from '../Medication/Medication.service';
+import { ObservationService } from '../Observation/Observation.service';
+import { ProcedureService } from '../Procedure/Procedure.service';
+
 @Component({
   selector: 'app-patient',
   templateUrl: './Patient.component.html',
   styleUrls: ['./Patient.component.css'],
-  providers: [PatientService, DoctorService]
+  providers: [
+    PatientService,
+    DoctorService,
+    AllergyService,
+    ConditionService,
+    ImmunizationService,
+    MedicationService,
+    ObservationService,
+    ProcedureService
+  ]
 })
 export class PatientComponent implements OnInit {
 
@@ -34,6 +51,15 @@ export class PatientComponent implements OnInit {
   private currentId;
   private errorMessage;
 
+  private patientRecord = {
+    allergies: [],
+    conditions: [],
+    immunizations: [],
+    medications: [],
+    observations: [],
+    procedures: []
+  };;
+  
   id = new FormControl('', Validators.required);
   birthDate = new FormControl('', Validators.required);
   deathDate = new FormControl('', Validators.required);
@@ -47,8 +73,15 @@ export class PatientComponent implements OnInit {
   allowedDoctor = new FormControl('', Validators.required);
 
 
-  constructor(public servicePatient: PatientService, public serviceDoctor: DoctorService, fb: FormBuilder) {
-    this.myForm = fb.group({
+  constructor(
+    public servicePatient: PatientService, public serviceDoctor: DoctorService,
+    public serviceAllergy: AllergyService, public serviceCondition: ConditionService,
+    public serviceImmunization: ImmunizationService, public serviceMedication: MedicationService,
+    public serviceObservation: ObservationService, public serviceProcedure: ProcedureService,
+    fb: FormBuilder
+    ) {
+    
+      this.myForm = fb.group({
       id: this.id,
       birthDate: this.birthDate,
       deathDate: this.deathDate,
@@ -346,6 +379,58 @@ export class PatientComponent implements OnInit {
       }
     });
 
+  }
+
+
+  async getRecord(id: string): Promise<any> {
+    const patientRecord = {
+      allergies: [],
+      conditions: [],
+      immunizations: [],
+      medications: [],
+      observations: [],
+      procedures: []
+    };
+
+    const resourceId = `resource:mc.thesis.demo.Patient#${id}`;
+
+    await this.serviceAllergy.getAll()
+    .toPromise()
+    .then((results) => {
+      patientRecord.allergies = results.filter(allergy => allergy.patient === resourceId);
+    });
+
+    await this.serviceCondition.getAll()
+    .toPromise()
+    .then((results) => {
+      patientRecord.conditions = results.filter(condition => condition.patient === resourceId);
+    });
+
+    await this.serviceImmunization.getAll()
+    .toPromise()
+    .then((results) => {
+      patientRecord.immunizations = results.filter(immunization => immunization.patient === resourceId);
+    });
+
+    await this.serviceMedication.getAll()
+    .toPromise()
+    .then((results) => {
+      patientRecord.medications = results.filter(medication => medication.patient === resourceId);
+    });
+
+    await this.serviceObservation.getAll()
+    .toPromise()
+    .then((results) => {
+      patientRecord.observations = results.filter(observation => observation.patient === resourceId);
+    });
+
+    await this.serviceProcedure.getAll()
+    .toPromise()
+    .then((results) => {
+      patientRecord.procedures = results.filter(procedure => procedure.patient === resourceId);
+    });
+
+    this.patientRecord = patientRecord;
   }
 
   resetForm(): void {
