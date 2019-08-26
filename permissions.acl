@@ -213,7 +213,7 @@ rule DoctorNoIdentityAccess {
 }
 
 rule DoctorFullAccess {
-    description: "Health providers should have access to other system resources"
+    description: "Doctors should have access to other system resources"
     participant: "mc.thesis.demo.Doctor"
     operation: ALL
     resource: "org.hyperledger.composer.system.**"
