@@ -58,7 +58,7 @@ export class PatientComponent implements OnInit {
     medications: [],
     observations: [],
     procedures: []
-  };;
+  };
   
   id = new FormControl('', Validators.required);
   birthDate = new FormControl('', Validators.required);
@@ -431,6 +431,17 @@ export class PatientComponent implements OnInit {
     });
 
     this.patientRecord = patientRecord;
+  }
+
+  resetRecord(): void {
+    this.patientRecord = {
+      allergies: [],
+      conditions: [],
+      immunizations: [],
+      medications: [],
+      observations: [],
+      procedures: []
+    };
   }
 
   resetForm(): void {
