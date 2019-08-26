@@ -15,4 +15,17 @@
 	<div class="jumbotron">
 		<h1>HealthNet-Block</h1>
 	</div>
+
+	<div>
+		<button
+			class="btn btn-primary"
+			(click)="generateData();"
+		>
+		Create Test Data
+		</button>
+		<br />
+		<div>
+			<h4 class="errorMessage">{{responseMessage}}</h4>
+		</div>
+	</div>
 </div>
