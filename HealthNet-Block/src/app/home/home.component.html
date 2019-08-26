@@ -27,5 +27,37 @@
 		<div>
 			<h4 class="errorMessage">{{responseMessage}}</h4>
 		</div>
+		<div class="results-container" *ngIf="responseMessage !== null">
+			<div>
+				<span>Allergy asset: <strong class="result" *ngIf="allergyOk !== null">{{allergyOk}}</strong></span>
+			</div>
+			<div>
+				<span>Condition asset: <strong class="result" *ngIf="conditionOk !== null">{{conditionOk}}</strong></span>
+			</div>
+			<div>
+				<span>Immunization asset: <strong class="result" *ngIf="immunizationOk !== null">{{immunizationOk}}</strong></span>
+			</div>
+			<div>
+				<span>Medication asset: <strong class="result" *ngIf="medicationOk !== null">{{medicationOk}}</strong></span>
+			</div>
+			<div>
+				<span>Observation asset: <strong class="result" *ngIf="observationOk !== null">{{observationOk}}</strong></span>
+			</div>
+			<div>
+				<span>Procedure asset: <strong class="result" *ngIf="procedureOk !== null">{{procedureOk}}</strong></span>
+			</div>
+			<div>
+				<span>Doctor participants:
+					<strong class="result" class="result" *ngIf="doctorsOk[0] !== null">1st --> {{doctorsOk[0]}}</strong> | 
+					<strong class="result" *ngIf="doctorsOk[1] !== null">2nd --> {{doctorsOk[1]}}</strong>
+				</span>
+			</div>
+			<div>
+				<span>Patient participants:
+					<strong class="result" *ngIf="patientsOk[0] !== null">1st --> {{patientsOk[0]}}</strong> | 
+					<strong class="result" *ngIf="patientsOk[1] !== null">2nd --> {{patientsOk[1]}}</strong>
+				</span>
+			</div>
+		</div>
 	</div>
 </div>

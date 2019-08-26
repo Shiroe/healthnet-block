@@ -14,3 +14,13 @@
 body {
     background-color: red;
 }
+
+.results-container {
+    padding: 20px;
+    font-size: 22px;
+    line-height: 24px;
+}
+
+.results-container .result {
+    color: #9400ff;
+}

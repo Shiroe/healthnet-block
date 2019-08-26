@@ -57,6 +57,16 @@ export class HomeComponent {
   }
 
   private responseMessage: string = null;
+
+  private allergyOk: boolean = null;
+  private conditionOk: boolean = null;
+  private immunizationOk: boolean = null;
+  private medicationOk: boolean = null;
+  private observationOk: boolean = null;
+  private procedureOk: boolean = null;
+  private doctorsOk: Array<boolean> = [null, null];
+  private patientsOk: Array<boolean> = [null, null];
+
   
   async generateData(): Promise<any> {
     const {
@@ -69,43 +79,53 @@ export class HomeComponent {
 
     await this.serviceAllergy.addAsset(allergies[0])
     .toPromise()
-    .then(() => console.log('Allergy asset created.'));
+    .then(() => { this.allergyOk = true; })
+    .catch((error) => { this.allergyOk = false; });
     
     await this.serviceCondition.addAsset(conditions[0])
     .toPromise()
-    .then(() => console.log('Condition asset created.'));
+    .then(() => { this.conditionOk = true; })
+    .catch((error) => { this.conditionOk = false; });
     
     await this.serviceImmunization.addAsset(immunizations[0])
     .toPromise()
-    .then(() => console.log('Immunization asset created.'));
+    .then(() => { this.immunizationOk = true; })
+    .catch((error) => { this.immunizationOk = false; });
     
     await this.serviceMedication.addAsset(medications[0])
     .toPromise()
-    .then(() => console.log('Medication asset created.'));
+    .then(() => { this.medicationOk = true; })
+    .catch((error) => { this.medicationOk = false; });
     
     await this.serviceObservation.addAsset(observations[0])
     .toPromise()
-    .then(() => console.log('Observation asset created.'));
+    .then(() => { this.observationOk = true; })
+    .catch((error) => { this.observationOk = false; });
     
     await this.serviceProcedure.addAsset(procedures[0])
     .toPromise()
-    .then(() => console.log('Procedure asset created.'));
+    .then(() => { this.procedureOk = true; })
+    .catch((error) => { this.procedureOk = false; });
 
     await this.serviceDoctor.addParticipant(doctors[0])
     .toPromise()
-    .then(() => console.log('Doctor participant created.'));
+    .then(() => { this.doctorsOk[0] = true; })
+    .catch((error) => { this.doctorsOk[0] = false; });
 
     await this.serviceDoctor.addParticipant(doctors[1])
     .toPromise()
-    .then(() => console.log('Doctor participant created.'));
+    .then(() => { this.doctorsOk[1] = true; })
+    .catch((error) => { this.doctorsOk[1] = false; });
     
     await this.servicePatient.addParticipant(patients[0])
     .toPromise()
-    .then(() => console.log('Patient participant created.'));
+    .then(() => { this.patientsOk[0] = true; })
+    .catch((error) => { this.patientsOk[0] = false; });
     
     await this.servicePatient.addParticipant(patients[1])
     .toPromise()
-    .then(() => console.log('Patient participant created.'));
+    .then(() => { this.patientsOk[1] = true; })
+    .catch((error) => { this.patientsOk[1] = false; });
     
 
     this.responseMessage = 'Generating Test DATA complete!';
